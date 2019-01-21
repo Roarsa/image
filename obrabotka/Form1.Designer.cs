@@ -53,11 +53,15 @@
             this.Rotation = new System.Windows.Forms.Button();
             this.Scailing = new System.Windows.Forms.Button();
             this.ScailingConst = new System.Windows.Forms.TextBox();
-            this.button7 = new System.Windows.Forms.Button();
-            this.button8 = new System.Windows.Forms.Button();
+            this.Kirsh = new System.Windows.Forms.Button();
+            this.Binar = new System.Windows.Forms.Button();
+            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+            this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)(this.BasicImage)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.newImage)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.PixelBar)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
             this.SuspendLayout();
             // 
             // BasicImage
@@ -302,31 +306,49 @@
             this.ScailingConst.Size = new System.Drawing.Size(100, 20);
             this.ScailingConst.TabIndex = 24;
             // 
-            // button7
+            // Kirsh
             // 
-            this.button7.Location = new System.Drawing.Point(12, 428);
-            this.button7.Name = "button7";
-            this.button7.Size = new System.Drawing.Size(141, 32);
-            this.button7.TabIndex = 25;
-            this.button7.Text = "Оператор Кирша";
-            this.button7.UseVisualStyleBackColor = true;
+            this.Kirsh.Location = new System.Drawing.Point(12, 428);
+            this.Kirsh.Name = "Kirsh";
+            this.Kirsh.Size = new System.Drawing.Size(141, 32);
+            this.Kirsh.TabIndex = 25;
+            this.Kirsh.Text = "Оператор Кирша";
+            this.Kirsh.UseVisualStyleBackColor = true;
+            this.Kirsh.Click += new System.EventHandler(this.Kirsh_Click);
             // 
-            // button8
+            // Binar
             // 
-            this.button8.Location = new System.Drawing.Point(12, 466);
-            this.button8.Name = "button8";
-            this.button8.Size = new System.Drawing.Size(141, 32);
-            this.button8.TabIndex = 26;
-            this.button8.Text = "Бинаризация";
-            this.button8.UseVisualStyleBackColor = true;
+            this.Binar.Location = new System.Drawing.Point(12, 466);
+            this.Binar.Name = "Binar";
+            this.Binar.Size = new System.Drawing.Size(141, 32);
+            this.Binar.TabIndex = 26;
+            this.Binar.Text = "Бинаризация";
+            this.Binar.UseVisualStyleBackColor = true;
+            this.Binar.Click += new System.EventHandler(this.Binar_Click);
+            // 
+            // numericUpDown1
+            // 
+            this.numericUpDown1.Location = new System.Drawing.Point(340, 488);
+            this.numericUpDown1.Name = "numericUpDown1";
+            this.numericUpDown1.Size = new System.Drawing.Size(120, 20);
+            this.numericUpDown1.TabIndex = 27;
+            // 
+            // numericUpDown2
+            // 
+            this.numericUpDown2.Location = new System.Drawing.Point(506, 488);
+            this.numericUpDown2.Name = "numericUpDown2";
+            this.numericUpDown2.Size = new System.Drawing.Size(120, 20);
+            this.numericUpDown2.TabIndex = 28;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(826, 599);
-            this.Controls.Add(this.button8);
-            this.Controls.Add(this.button7);
+            this.Controls.Add(this.numericUpDown2);
+            this.Controls.Add(this.numericUpDown1);
+            this.Controls.Add(this.Binar);
+            this.Controls.Add(this.Kirsh);
             this.Controls.Add(this.ScailingConst);
             this.Controls.Add(this.Scailing);
             this.Controls.Add(this.Rotation);
@@ -356,6 +378,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.BasicImage)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.newImage)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.PixelBar)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -388,8 +412,10 @@
         private System.Windows.Forms.Button Rotation;
         private System.Windows.Forms.Button Scailing;
         private System.Windows.Forms.TextBox ScailingConst;
-        private System.Windows.Forms.Button button7;
-        private System.Windows.Forms.Button button8;
+        private System.Windows.Forms.Button Kirsh;
+        private System.Windows.Forms.Button Binar;
+        private System.Windows.Forms.NumericUpDown numericUpDown1;
+        private System.Windows.Forms.NumericUpDown numericUpDown2;
     }
 }
 

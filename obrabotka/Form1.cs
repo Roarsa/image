@@ -17,7 +17,18 @@ namespace obrabotka
   
         private Point start, end, center;
         private Rectangle Rect = new Rectangle();
-        private Brush selectionBrush = new SolidBrush(Color.FromArgb(128, 72, 145, 220));
+        private Brush selectionBrush = new SolidBrush(Color.FromArgb(70, 244, 66, 66));
+        private List<int[,]> templates = new List<int[,]>
+        {
+           new int[,] {{ -3, -3, 5 }, { -3, 0, 5 }, { -3, -3, 5 } },
+           new int[,] {{ -3, 5, 5 }, { -3, 0, 5 }, { -3, -3, -3 } },
+           new int[,] {{ 5, 5, 5 }, { -3, 0, -3 }, { -3, -3, -3 } },
+           new int[,] {{ 5, 5, -3 }, { 5, 0, -3 }, { -3, -3, -3 } },
+           new int[,] {{ 5, -3, -3 }, { 5, 0, -3 }, { 5, -3, -3 } },
+           new int[,] {{ -3, -3, -3 }, { 5, 0, -3 }, { 5, 5, -3 } },
+           new int[,] {{ -3, -3, -3 }, { -3, 0, -3 }, { 5, 5, 5 } },
+           new int[,] {{ -3, -3, -3 }, { -3, 0, 5 }, { -3, 5, 5 } }
+        };
 
         public Form1()
         {
@@ -33,6 +44,8 @@ namespace obrabotka
             button6.Hide();
             axis.Hide();
             ScailingConst.Hide();
+            numericUpDown1.Hide();
+            numericUpDown2.Hide();
             axis.SelectedItem = "Центр";
             ScailingConst.Text = "1";
         }
@@ -490,12 +503,8 @@ namespace obrabotka
                 if (e.Button != MouseButtons.Left)
                     return;
                 end = e.Location;
-                Rect.Location = new Point(
-                    Math.Min(start.X, end.X),
-                    Math.Min(start.Y, end.Y));
-                Rect.Size = new Size(
-                    Math.Abs(start.X - end.X),
-                    Math.Abs(start.Y - end.Y));
+                Rect.Location = new Point(Math.Min(start.X, end.X), Math.Min(start.Y, end.Y));
+                Rect.Size = new Size(Math.Abs(start.X - end.X), Math.Abs(start.Y - end.Y));
                 BasicImage.Invalidate();
             }
 
@@ -569,7 +578,8 @@ namespace obrabotka
             button6.Hide();
             axis.Hide();
             ScailingConst.Show();
-            newImage.Image = new Bitmap(1, 1);
+            numericUpDown1.Hide();
+            numericUpDown2.Hide();
 
             if (Rect.Width == 0 || Rect.Height == 0) {
                 return;
@@ -673,6 +683,122 @@ namespace obrabotka
             newImage.Image = new_image;
         }
 
+        private int getD(int cr, int cl, int cu, int cd, int cld, int clu, int cru, int crd, int[,] matrix)
+        {
+            return Math.Abs(matrix[0, 0] * clu + matrix[0, 1] * cu + matrix[0, 2] * cru
+               + matrix[1, 0] * cl + matrix[1, 2] * cr
+                  + matrix[2, 0] * cld + matrix[2, 1] * cd + matrix[2, 2] * crd);
+        }
+
+        private int getMaxD(int cr, int cl, int cu, int cd, int cld, int clu, int cru, int crd)
+        {
+            int max = int.MinValue;
+            for (int i = 0; i < templates.Count; i++)
+            {
+                int newVal = getD(cr, cl, cu, cd, cld, clu, cru, crd, templates[i]);
+                if (newVal > max)
+                    max = newVal;
+            }
+            return max;
+        }
+
+        private void Kirsh_Click(object sender, EventArgs e)
+        {
+            flag = "Kirsh";
+            PixelBar.Hide();
+            PixelBar_value.Hide();
+            button1.Hide();
+            button2.Hide();
+            button3.Hide();
+            button4.Hide();
+            button5.Hide();
+            button6.Hide();
+            axis.Hide();
+            ScailingConst.Hide();
+            numericUpDown1.Hide();
+            numericUpDown2.Hide();
+
+            Bitmap new_image = new Bitmap(BasicImage.Image.Width, BasicImage.Image.Height);
+            Bitmap old_image = (Bitmap)BasicImage.Image;
+
+            for (int x = 1; x < BasicImage.Image.Width - 1; x++)
+            {
+                for (int y = 1; y < BasicImage.Image.Height - 1; y++)
+                {
+                    Color cr = old_image.GetPixel(x + 1, y);
+                    Color cl = old_image.GetPixel(x - 1, y);
+                    Color cu = old_image.GetPixel(x, y - 1);
+                    Color cd = old_image.GetPixel(x, y + 1);
+                    Color cld = old_image.GetPixel(x - 1, y + 1);
+                    Color clu = old_image.GetPixel(x - 1, y - 1);
+                    Color crd = old_image.GetPixel(x + 1, y + 1);
+                    Color cru = old_image.GetPixel(x + 1, y - 1);
+                    int p = getMaxD(cr.R, cl.R, cu.R, cd.R, cld.R, clu.R, cru.R, crd.R);
+                    if (p > 255) { p = 255; }
+                    else if (p < 0) { p = 0; }
+                    new_image.SetPixel(x, y, Color.FromArgb(p, p, p));
+                }
+            }
+            newImage.Image = new_image;
+        }
+
+        private void Binar_Click(object sender, EventArgs e)
+        {
+            flag = "Binar";
+            PixelBar.Hide();
+            PixelBar_value.Hide();
+            button1.Hide();
+            button2.Hide();
+            button3.Hide();
+            button4.Hide();
+            button5.Hide();
+            button6.Hide();
+            axis.Hide();
+            ScailingConst.Hide();
+            numericUpDown1.Show();
+            numericUpDown2.Show();
+
+            int mat = (int)numericUpDown1.Value;
+            int min = 255;
+            int max = 0;
+            int len = (mat - 1) / 2;
+            int threshold = (int)numericUpDown2.Value;
+            Bitmap new_image = new Bitmap(BasicImage.Image.Width, BasicImage.Image.Height);
+            Bitmap old_image = (Bitmap)BasicImage.Image;
+
+            for (int x = 0; x < old_image.Width; x++)
+            {
+                for (int y = 0; y < old_image.Height; y++)
+                {
+                    for (int k = -len; k < len; k++)
+                    {
+                        for (int m = -len; m < len; m++)
+                        {
+                            if ((x + k) > len && (y + m) > len && (y + m) < old_image.Height && (x + k) < old_image.Width)
+                            {
+                                if (image_mass[x + k, y + m] > max)
+                                {
+                                    max = image_mass[x + k, y + m];
+                                }
+                                else if (image_mass[x + k, y + m] < min)
+                                {
+                                    min = image_mass[x + k, y + m];
+                                }
+                            }
+                        }
+                    }
+                    if (min > 255) { min = 255; }
+                    else if (min < 0) { min = 0; }
+                    if (max > 255) { max = 255; }
+                    else if (max < 0) {max = 0; }
+                    new_image.SetPixel(x, y, image_mass[x, y] >= (max + min) / 2 + threshold ? Color.Black : Color.White);
+                    min = 255;
+                    max = 0;
+                }
+            }
+            newImage.Image = new_image;
+        }
+
         private void BasicImage_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             if (flag == "Rotation" || flag == "Scaling")
@@ -702,6 +828,8 @@ namespace obrabotka
             button6.Hide();
             axis.Show();
             ScailingConst.Hide();
+            numericUpDown1.Hide();
+            numericUpDown2.Hide();
 
             if (Rect.Width == 0 || Rect.Height == 0)
             {
@@ -739,5 +867,7 @@ namespace obrabotka
             }
             newImage.Image = new_image;
         }
+
+
     }
 }
