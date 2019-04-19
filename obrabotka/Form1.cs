@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-
 namespace obrabotka
 {
 
@@ -880,80 +879,168 @@ namespace obrabotka
             
         }
 
+        private Bitmap Gauss(Bitmap image)
+        {
+            Bitmap new_image = image;
+            int x = image.Width;
+            int y = image.Height;
+            int[,] GaussMap = new int[,] { { 1, 4, 7, 4, 1 }, { 4, 16, 26, 16, 4 }, { 7, 26, 41, 26, 7 }, { 4, 16, 26, 16, 4 }, { 1, 4, 7, 4, 1 } };
+            for (int i = 2; i < x - 2; i++)
+            {
+                for (int j = 2; j < y - 2; j++)
+                {
+                    int R = 0;
+                    int G = 0;
+                    int B = 0;
+                    for (int k = -2; k < 2; k++)
+                    {
+                        for (int m = -2; m < 2; m++)
+                        {
+                            R += GaussMap[2 + k, 2 + m] * image.GetPixel(i + k, j + m).R;
+                            G += GaussMap[2 + k, 2 + m] * image.GetPixel(i + k, j + m).G;
+                            B += GaussMap[2 + k, 2 + m] * image.GetPixel(i + k, j + m).B;
+                        }
+                    }
+                    R = R / 273;
+                    G = G / 273;
+                    B = B / 273;
+                    R = R < 0 ? 0 : R;
+                    R = R > 255 ? 255 : R;
+                    G = G < 0 ? 0 : G;
+                    G = G > 255 ? 255 : G;
+                    B = B < 0 ? 0 : B;
+                    B = B > 255 ? 255 : B;
+                    new_image.SetPixel(i, j, Color.FromArgb(R, G, B));
+                }
+            }
+            return new_image;
+        }
+
+        private Bitmap KirshF(Bitmap image)
+        {
+            Bitmap new_image = new Bitmap(image.Width, image.Height);
+            Bitmap old_image = image;
+
+            for (int x = 1; x < image.Width - 1; x++)
+            {
+                for (int y = 1; y < image.Height - 1; y++)
+                {
+                    Color cr = old_image.GetPixel(x + 1, y);
+                    Color cl = old_image.GetPixel(x - 1, y);
+                    Color cu = old_image.GetPixel(x, y - 1);
+                    Color cd = old_image.GetPixel(x, y + 1);
+                    Color cld = old_image.GetPixel(x - 1, y + 1);
+                    Color clu = old_image.GetPixel(x - 1, y - 1);
+                    Color crd = old_image.GetPixel(x + 1, y + 1);
+                    Color cru = old_image.GetPixel(x + 1, y - 1);
+                    int p = getMD(cr.R, cl.R, cu.R, cd.R, cld.R, clu.R, cru.R, crd.R);
+                    if (p > 255) { p = 255; }
+                    new_image.SetPixel(x, y, Color.FromArgb(p, p, p));
+                }
+            }
+            return new_image;
+        }
+
         private void Money_Click(object sender, EventArgs e)
         {
-            Bitmap new_image = (Bitmap)BasicImage.Image;
             Bitmap old_image = (Bitmap)BasicImage.Image;
-            int[,,] houghMap = new int[81,new_image.Width+1,new_image.Height+1];
+            Bitmap new_image = KirshF(Gauss((Bitmap)old_image));
+            newImage.Image = new_image;
+            int[,,] houghMap = new int[new_image.Height/2 + 1,new_image.Width+1,new_image.Height+1];
 
-            for (int r = 55; r<80; r++)
-            {
-                for (int a = 0; a < new_image.Width; a++)
+            for (int a = 0; a < new_image.Width; a++)
+           {
+                for (int b = 0; b < new_image.Height; b++)
                 {
-                    for (int b = 0; b < new_image.Height; b++)
+                    for (int r = 50; r < 100; r++)
                     {
                         houghMap[r, a, b] = 0;
                     }
+                    
+                }
+           }
+            
+
+
+            for (int x = 0; x < old_image.Width; x++)
+            {
+                for (int y=0; y < old_image.Height; y++)
+                {
+                    Color pix_col = new_image.GetPixel(x, y);
+                    if (pix_col.R == 255 && pix_col.G == 255 && pix_col.B == 255)
+                    {
+                        for (int radius = 55; radius < 80; radius++)
+                        {
+                            for (int theta = 0; theta < 360; theta++)
+                            {
+                                int a = (int)(x - radius* Math.Cos(theta * Math.PI / 180)); 
+                                int b = (int)(y - radius* Math.Sin(theta * Math.PI/ 180));
+                                if (a > radius && b > radius && a < new_image.Width - radius && b < new_image.Height - radius)
+                                {
+                                    houghMap[radius, a, b]++;
+                                }
+                            }
+                        }
+                    }
+                    
                 }
             }
 
-
-            for (int x = 0; x < new_image.Width; x++)
+            List<List<int>> maxHoughMap = new List<List<int>>();
+            int max_a = 0;
+            int max_b = 0;
+            int isf = 0;
+            for (int a = 0; a < old_image.Width; a++)
             {
-                for (int y=0; y < new_image.Height; y++)
+                for (int b = 0; b < old_image.Height; b++)
                 {
-                    for (int radius = 55; radius < 80; radius++)
+                    for (int radius = 10; radius < old_image.Height/2+1; radius++)
                     {
-                        for (int theta = 0; theta < 360; theta++)
+                        if (houghMap[radius,a,b] > 4.9*radius)
                         {
-                            Color pix_col = old_image.GetPixel(x, y);
-                            if (pix_col.R == 255 && pix_col.G == 255 && pix_col.B == 255)
+                            if (a > radius && b > radius && a < new_image.Width - radius && b < new_image.Height - radius)
                             {
-                                int a = (int)Math.Round(x - radius* Math.Cos(theta * Math.PI / 180)); 
-                                int b = (int)Math.Round(y - radius* Math.Sin(theta * Math.PI/ 180));
-                                if (a > radius && b > radius && a < new_image.Width - radius && b < new_image.Height - radius)
+                                if (max_a == a && max_b == b)
                                 {
-                                    label1.Text = $"{a}";
-                                    label2.Text = $"{b}";
-                                    label3.Text = $"{radius}";
-                                    houghMap[radius, a, b]++;
+                                    continue;
+                                }
+                                if (max_a == 0)
+                                {
+                                    isf += 1;
+                                    max_a = a;
+                                }
+                                if (max_b == 0)
+                                {
+                                    max_b = b;
+                                    List<int> coin = new List<int>() { radius, max_a, max_b };
+                                    maxHoughMap.Add(coin);
+                                }
+                                if (Math.Abs(max_a - a) <= 20 && Math.Abs(max_b - b) <= 20)
+                                {
+                                    continue;
+                                }
+                                else
+                                {   
+                                    max_a = 0;
+                                    max_b = 0;
+                                    List<int> coin = new List<int>() { radius, a, b };
+                                    maxHoughMap.Add(coin);
                                 }
                             }
                         }
                     }
                 }
             }
-
-            int max_el = houghMap[55, 0, 0];
-            int max_a = 0;
-            int max_b = 0;
-            int max_r = 55;
-            for (int r = 55; r < 80; r++)
+            int listSize = maxHoughMap.Count;
+            for (int i = 0; i < listSize; i++)
             {
-                for (int a = 0; a < new_image.Width; a++)
-                {
-                    for (int b = 0; b < new_image.Height; b++)
-                    {
-                        if (max_el < houghMap[r,a,b])
-                        {
-                            max_el = houghMap[r, a, b];
-                            max_a = a;
-                            max_b = b;
-                            max_r = r;
-                        }
-                    }
-                }
+                int radius = maxHoughMap[i][0];
+                int a = maxHoughMap[i][1];
+                int b = maxHoughMap[i][2];
+                Graphics circle = Graphics.FromImage(newImage.Image);
+                Pen col = new Pen(Color.Red, 3);
+                circle.DrawEllipse(col, a-radius, b-radius, radius * 2, radius * 2);
             }
-
-            label1.Text = $"{max_a}";
-            label2.Text = $"{max_b}";
-            label3.Text = $"{max_r}";
-
-            int coord_x = max_a - max_r;
-            int coord_y = max_b - max_r;
-            Graphics circle = Graphics.FromImage(new_image);
-            Pen col = new Pen(Color.Red, 5);
-            circle.DrawEllipse(col, coord_x, coord_y, max_r * 2, max_r * 2);
         }
 
         private void BasicImage_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
