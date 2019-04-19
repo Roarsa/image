@@ -884,7 +884,7 @@ namespace obrabotka
         {
             Bitmap new_image = (Bitmap)BasicImage.Image;
             Bitmap old_image = (Bitmap)BasicImage.Image;
-            int[,,] houghMap = new int[80,400,450];
+            int[,,] houghMap = new int[81,new_image.Width+1,new_image.Height+1];
 
             for (int r = 55; r<80; r++)
             {
@@ -904,29 +904,31 @@ namespace obrabotka
                 {
                     for (int radius = 55; radius < 80; radius++)
                     {
-                        for (int theta = 0; theta < 361; theta++)
+                        for (int theta = 0; theta < 360; theta++)
                         {
                             Color pix_col = old_image.GetPixel(x, y);
                             if (pix_col.R == 255 && pix_col.G == 255 && pix_col.B == 255)
                             {
                                 int a = (int)Math.Round(x - radius* Math.Cos(theta * Math.PI / 180)); 
                                 int b = (int)Math.Round(y - radius* Math.Sin(theta * Math.PI/ 180));
-                                if (a < radius || b < radius || a > new_image.Width - radius || b > new_image.Height - radius)
-                                    continue;
-                                label1.Text = $"{a}";
-                                label2.Text = $"{b}";
-                                houghMap[radius, a, b]++;
+                                if (a > radius && b > radius && a < new_image.Width - radius && b < new_image.Height - radius)
+                                {
+                                    label1.Text = $"{a}";
+                                    label2.Text = $"{b}";
+                                    label3.Text = $"{radius}";
+                                    houghMap[radius, a, b]++;
+                                }
                             }
                         }
                     }
                 }
             }
 
-            int max_el = houghMap[10, 0, 0];
+            int max_el = houghMap[55, 0, 0];
             int max_a = 0;
             int max_b = 0;
-            int max_r = 10;
-            for (int r = 10; r < 60; r++)
+            int max_r = 55;
+            for (int r = 55; r < 80; r++)
             {
                 for (int a = 0; a < new_image.Width; a++)
                 {
@@ -943,8 +945,12 @@ namespace obrabotka
                 }
             }
 
+            label1.Text = $"{max_a}";
+            label2.Text = $"{max_b}";
+            label3.Text = $"{max_r}";
+
             int coord_x = max_a - max_r;
-            int coord_y = max_b + max_r;
+            int coord_y = max_b - max_r;
             Graphics circle = Graphics.FromImage(new_image);
             Pen col = new Pen(Color.Red, 5);
             circle.DrawEllipse(col, coord_x, coord_y, max_r * 2, max_r * 2);
