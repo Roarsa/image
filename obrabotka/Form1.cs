@@ -690,7 +690,7 @@ namespace obrabotka
                   + matrix[2, 0] * cld + matrix[2, 1] * cd + matrix[2, 2] * crd);
         }
 
-        private int getMaxD(int cr, int cl, int cu, int cd, int cld, int clu, int cru, int crd)
+        private int getMD(int cr, int cl, int cu, int cd, int cld, int clu, int cru, int crd)
         {
             int max = int.MinValue;
             for (int i = 0; i < templates.Count; i++)
@@ -733,9 +733,8 @@ namespace obrabotka
                     Color clu = old_image.GetPixel(x - 1, y - 1);
                     Color crd = old_image.GetPixel(x + 1, y + 1);
                     Color cru = old_image.GetPixel(x + 1, y - 1);
-                    int p = getMaxD(cr.R, cl.R, cu.R, cd.R, cld.R, clu.R, cru.R, crd.R);
+                    int p = getMD(cr.R, cl.R, cu.R, cd.R, cld.R, clu.R, cru.R, crd.R);
                     if (p > 255) { p = 255; }
-                    else if (p < 0) { p = 0; }
                     new_image.SetPixel(x, y, Color.FromArgb(p, p, p));
                 }
             }
@@ -770,11 +769,11 @@ namespace obrabotka
             {
                 for (int y = 0; y < old_image.Height; y++)
                 {
-                    for (int k = -len; k < len; k++)
+                    for (int k = -len; k <= len; k++)
                     {
-                        for (int m = -len; m < len; m++)
+                        for (int m = -len; m <= len; m++)
                         {
-                            if ((x + k) > len && (y + m) > len && (y + m) < old_image.Height && (x + k) < old_image.Width)
+                            if ((x + k) >= 0 && (y + m) >= 0 && (y + m) < old_image.Height && (x + k) < old_image.Width)
                             {
                                 if (image_mass[x + k, y + m] > max)
                                 {
@@ -791,12 +790,164 @@ namespace obrabotka
                     else if (min < 0) { min = 0; }
                     if (max > 255) { max = 255; }
                     else if (max < 0) {max = 0; }
-                    new_image.SetPixel(x, y, image_mass[x, y] >= (max + min) / 2 + threshold ? Color.Black : Color.White);
+                    new_image.SetPixel(x, y, image_mass[x, y] >= (max + min) / 2 - threshold ? Color.White : Color.Black);
                     min = 255;
                     max = 0;
                 }
             }
             newImage.Image = new_image;
+        }
+
+        private void findLine_Click(object sender, EventArgs e)
+        {
+            flag = "Line";
+            PixelBar.Hide();
+            PixelBar_value.Hide();
+            button1.Hide();
+            button2.Hide();
+            button3.Hide();
+            button4.Hide();
+            button5.Hide();
+            button6.Hide();
+            axis.Hide();
+            ScailingConst.Hide();
+            numericUpDown1.Hide();
+            numericUpDown2.Hide();
+
+            label1.Text = "start";
+
+            Bitmap new_image = (Bitmap)BasicImage.Image;
+            Bitmap old_image = (Bitmap)BasicImage.Image;
+            int halfHoughWidth = (int)Math.Sqrt(old_image.Width/2 * old_image.Width / 2 + old_image.Height / 2 * old_image.Height / 2);
+            int houghWidth = halfHoughWidth * 2;
+            int[,] houghMap = new int[181, houghWidth]; 
+            for (int i = 0; i < 181; i++)
+            {
+                for (int j = 0; j < houghWidth; j++)
+                {
+                    houghMap[i, j] = 0;
+                }
+            }
+
+            for (int x = 0; x < old_image.Width; x++)
+            {
+                for (int y = 0; y < old_image.Height; y++)
+                {
+                    Color c = old_image.GetPixel(x, y);
+                    if (c.R == 255 && c.B == 255 && c.G == 255)
+                    {
+                        for (int theta = 0; theta <= 180; theta++)
+                        {
+                            int radius = (int)Math.Round(Math.Cos(theta) * x + y * Math.Sin(theta));
+                            if ((radius < 0) || (radius >= houghWidth))
+                                continue;
+                            houghMap[theta, radius]++;
+                        }
+                    }
+                }
+            }
+            int max_el = houghMap[0, 0];
+            int max_rad = 0;
+            int max_theta = 0;
+            for (int i = 0; i < 181; i++)
+            {
+                for (int j = 0; j < houghWidth; j++)
+                {
+                    if (max_el < houghMap[i, j]) {
+                        max_el = houghMap[i, j];
+                        max_theta = i;
+                        max_rad = j;
+                    }
+                }
+            }
+            int first_x = 0;
+            int first_y = (int)(((-Math.Cos(max_theta) / Math.Sin(max_theta)) * first_x) + (max_rad / Math.Sin(max_theta)));
+            int sec_x = old_image.Width;
+            int sec_y = (int)(((-Math.Cos(max_theta) / Math.Sin(max_theta)) * sec_x) + (max_rad / Math.Sin(max_theta)));
+            int second_y = 0;
+            int second_x = (int)(((-Math.Sin(max_theta) / Math.Cos(max_theta)) * second_y) + (max_rad / Math.Cos(max_theta)));
+            Graphics line = Graphics.FromImage(new_image);
+            Pen col = new Pen(Color.Red, 5);label1.Text = $"{first_x}";
+            label2.Text = $"{first_y}";
+            label3.Text = $"{sec_x}";
+            label4.Text = $"{sec_y}";
+            line.DrawLine(col, first_x, first_y, sec_x, sec_y);
+            newImage.Image = new_image;
+            char fy = (char)(first_y);
+            char fx = (char)(first_x);
+            char sx = (char)(second_x);
+            char sy = (char)(second_y);
+            
+        }
+
+        private void Money_Click(object sender, EventArgs e)
+        {
+            Bitmap new_image = (Bitmap)BasicImage.Image;
+            Bitmap old_image = (Bitmap)BasicImage.Image;
+            int[,,] houghMap = new int[80,400,450];
+
+            for (int r = 55; r<80; r++)
+            {
+                for (int a = 0; a < new_image.Width; a++)
+                {
+                    for (int b = 0; b < new_image.Height; b++)
+                    {
+                        houghMap[r, a, b] = 0;
+                    }
+                }
+            }
+
+
+            for (int x = 0; x < new_image.Width; x++)
+            {
+                for (int y=0; y < new_image.Height; y++)
+                {
+                    for (int radius = 55; radius < 80; radius++)
+                    {
+                        for (int theta = 0; theta < 361; theta++)
+                        {
+                            Color pix_col = old_image.GetPixel(x, y);
+                            if (pix_col.R == 255 && pix_col.G == 255 && pix_col.B == 255)
+                            {
+                                int a = (int)Math.Round(x - radius* Math.Cos(theta * Math.PI / 180)); 
+                                int b = (int)Math.Round(y - radius* Math.Sin(theta * Math.PI/ 180));
+                                if (a < radius || b < radius || a > new_image.Width - radius || b > new_image.Height - radius)
+                                    continue;
+                                label1.Text = $"{a}";
+                                label2.Text = $"{b}";
+                                houghMap[radius, a, b]++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            int max_el = houghMap[10, 0, 0];
+            int max_a = 0;
+            int max_b = 0;
+            int max_r = 10;
+            for (int r = 10; r < 60; r++)
+            {
+                for (int a = 0; a < new_image.Width; a++)
+                {
+                    for (int b = 0; b < new_image.Height; b++)
+                    {
+                        if (max_el < houghMap[r,a,b])
+                        {
+                            max_el = houghMap[r, a, b];
+                            max_a = a;
+                            max_b = b;
+                            max_r = r;
+                        }
+                    }
+                }
+            }
+
+            int coord_x = max_a - max_r;
+            int coord_y = max_b + max_r;
+            Graphics circle = Graphics.FromImage(new_image);
+            Pen col = new Pen(Color.Red, 5);
+            circle.DrawEllipse(col, coord_x, coord_y, max_r * 2, max_r * 2);
         }
 
         private void BasicImage_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
