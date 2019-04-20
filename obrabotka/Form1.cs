@@ -960,7 +960,7 @@ namespace obrabotka
                     Color pix_col = new_image.GetPixel(x, y);
                     if (pix_col.R == 255 && pix_col.G == 255 && pix_col.B == 255)
                     {
-                        for (int radius = 55; radius < 80; radius++)
+                        for (int radius = 30; radius < 80; radius++)
                         {
                             for (int theta = 0; theta < 360; theta++)
                             {
@@ -976,110 +976,160 @@ namespace obrabotka
                     
                 }
             }
-
-            List<List<int>> maxHoughMap = new List<List<int>>();
-            int max_a = 0;
-            int max_b = 0;
-            int max_rad = 0;
-            int max_radius = 0;
-            for (int a = 0; a < old_image.Width; a++)
+            List<List<int>> mat = new List<List<int>>();
+            for (int rad = 0; rad < 80; rad++)
             {
-                for (int b = 0; b < old_image.Height; b++)
+                for (int a = 0; a < old_image.Width; a++)
                 {
-                    for (int radius = 10; radius < old_image.Height / 2 + 1; radius++)
+                    for (int b = 0; b < old_image.Height; b++)
                     {
-                        if (houghMap[radius, a, b] > 4.9 * radius)
+                        int value = houghMap[rad, a, b];
+                        if (value < 125)
+                            continue;
+
+                        bool flag = true;
+
+                        for (int radOffset = -1; flag && radOffset <= 1; radOffset++)
                         {
-                            if (a > radius && b > radius && a < new_image.Width - radius && b < new_image.Height - radius)
+                            for (int aOffset = -1; flag && aOffset <= 1; aOffset++)
                             {
-                                if (max_a == a && max_b == b)
+                                for (int bOffset = -1; flag && bOffset <= 1; bOffset++)
                                 {
-                                    continue;
-                                }
-                                if (max_a == 0)
-                                {
-                                    max_a = a;
-                                }
-                                if (max_b == 0)
-                                {
-                                    max_b = b;
-                                    List<int> coin = new List<int>() { radius, max_a, max_b };
-                                    maxHoughMap.Add(coin);
-                                }
-                                if (Math.Abs(max_a - a) <= 20 && Math.Abs(max_b - b) <= 20)
-                                {
-                                    continue;
-                                }
-                                else
-                                {
-                                    max_a = 0;
-                                    max_b = 0;
-                                    List<int> coin = new List<int>() { radius, a, b };
-                                    maxHoughMap.Add(coin);
+                                    if (radOffset == 0 && bOffset == 0 && aOffset == 0)
+                                        continue;
+                                    int radOffseted = rad + radOffset;
+                                    int aOffseted = a + aOffset;
+                                    int bOffseted = b + bOffset;
+
+                                    if (radOffseted >= 0 && aOffseted >= 0 && bOffseted >= 0 && radOffseted < 80
+                                        && aOffseted < old_image.Width && bOffseted < old_image.Height 
+                                        && value < houghMap[radOffseted, aOffseted, bOffseted])
+                                        flag = false;
                                 }
                             }
+                        }
+                        if (flag)
+                        {
+                            List<int> n = new List<int>() { rad, a, b };
+                            mat.Add(n);
                         }
                     }
                 }
             }
-            int listSize = maxHoughMap.Count;
-            for (int i = 0; i < listSize-1; i++)
+            for (int i = 0; i < mat.Count; i++)
             {
-                for (int j = i+1; j < listSize; j++)
-                {
-                    if (maxHoughMap[i][0] < maxHoughMap[j][0])
-                    {
-                        List<int> x = maxHoughMap[i];
-                        maxHoughMap[i] = maxHoughMap[j];
-                        maxHoughMap[j] = x;
-                    }
-                }
-            }
-            for (int i = 0; i < listSize; i++)
-            {
-                int radius = maxHoughMap[i][0];
-                int a = maxHoughMap[i][1];
-                int b = maxHoughMap[i][2];
+                int radius = mat[i][0];
+                int a = mat[i][1];
+                int b = mat[i][2];
                 Graphics circle = Graphics.FromImage(newImage.Image);
                 Pen col = new Pen(Color.Red, 1);
                 circle.DrawEllipse(col, a-radius, b-radius, radius * 2, radius * 2);
             }
 
-            List<int> coins = new List<int>();
-            if (fiveCoin.SelectedItem.ToString() == "Да")
-                coins.Add(5);
-            if (twoCoin.SelectedItem.ToString() == "Да")
-                coins.Add(2);
-            if (oneCoin.SelectedItem.ToString() == "Да")
-                coins.Add(1);
-            int[] numOfCoins = new int[coins.Count];
-            for (int i = 0; i < coins.Count; i++)
-            {
-                numOfCoins[i] = 0;
-            }
-            int number = 0;
-            int rad = maxHoughMap[0][0];
-            for (int i = 0; i < listSize; i++)
-            {
-                if (rad - maxHoughMap[i][0] < 4)
-                {
-                    numOfCoins[number] += 1;
-                }
-                else
-                {
-                    rad = maxHoughMap[i][0];
-                    number += 1;
-                    numOfCoins[number] += 1;
-                }
-            }
+            //List<List<int>> maxHoughMap = new List<List<int>>();
+            //int max_a = 0;
+            //int max_b = 0;
+            //int max_rad = 0;
+            //int max_radius = 0;
+            //for (int a = 0; a < old_image.Width; a++)
+            //{
+            //    for (int b = 0; b < old_image.Height; b++)
+            //    {
+            //        for (int radius = 10; radius < old_image.Height / 2 + 1; radius++)
+            //        {
+            //            if (houghMap[radius, a, b] > 4.9 * radius)
+            //            {
+            //                if (a > radius && b > radius && a < new_image.Width - radius && b < new_image.Height - radius)
+            //                {
+            //                    if (max_a == a && max_b == b)
+            //                    {
+            //                        continue;
+            //                    }
+            //                    if (max_a == 0)
+            //                    {
+            //                        max_a = a;
+            //                    }
+            //                    if (max_b == 0)
+            //                    {
+            //                        max_b = b;
+            //                        List<int> coin = new List<int>() { radius, max_a, max_b };
+            //                        maxHoughMap.Add(coin);
+            //                    }
+            //                    double distance = Math.Sqrt((max_a - a)* (max_a - a)+ (max_b - b) * (max_b - b));
+            //                    if (distance <= 20)
+            //                    {
+            //                        continue;
+            //                    }
+            //                    else
+            //                    {
+            //                        max_a = 0;
+            //                        max_b = 0;
+            //                        List<int> coin = new List<int>() { radius, a, b };
+            //                        maxHoughMap.Add(coin);
+            //                    }
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
+            //int listSize = maxHoughMap.Count;
+            //for (int i = 0; i < listSize-1; i++)
+            //{
+            //    for (int j = i+1; j < listSize; j++)
+            //    {
+            //        if (maxHoughMap[i][0] < maxHoughMap[j][0])
+            //        {
+            //            List<int> x = maxHoughMap[i];
+            //            maxHoughMap[i] = maxHoughMap[j];
+            //            maxHoughMap[j] = x;
+            //        }
+            //    }
+            //}
+            //for (int i = 0; i < listSize; i++)
+            //{
+            //    int radius = maxHoughMap[i][0];
+            //    int a = maxHoughMap[i][1];
+            //    int b = maxHoughMap[i][2];
+            //    Graphics circle = Graphics.FromImage(newImage.Image);
+            //    Pen col = new Pen(Color.Red, 1);
+            //    circle.DrawEllipse(col, a-radius, b-radius, radius * 2, radius * 2);
+            //}
 
-            int sum = 0;
-            for (int i = 0; i < coins.Count; i++)
-            {
-                sum += coins[i] * numOfCoins[i];
-            }
-            label1.Text = $"{sum}";
-            
+            //List<int> coins = new List<int>();
+            //if (fiveCoin.SelectedItem.ToString() == "Да")
+            //    coins.Add(5);
+            //if (twoCoin.SelectedItem.ToString() == "Да")
+            //    coins.Add(2);
+            //if (oneCoin.SelectedItem.ToString() == "Да")
+            //    coins.Add(1);
+            //int[] numOfCoins = new int[coins.Count];
+            //for (int i = 0; i < coins.Count; i++)
+            //{
+            //    numOfCoins[i] = 0;
+            //}
+            //int number = 0;
+            //int rad = maxHoughMap[0][0];
+            //for (int i = 0; i < listSize; i++)
+            //{
+            //    if (rad - maxHoughMap[i][0] < 4)
+            //    {
+            //        numOfCoins[number] += 1;
+            //    }
+            //    else
+            //    {
+            //        rad = maxHoughMap[i][0];
+            //        number += 1;
+            //        numOfCoins[number] += 1;
+            //    }
+            //}
+
+            //int sum = 0;
+            //for (int i = 0; i < coins.Count; i++)
+            //{
+            //    sum += coins[i] * numOfCoins[i];
+            //}
+            //label1.Text = $"{sum}";
+
         }
         
 
