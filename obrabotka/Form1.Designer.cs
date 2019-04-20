@@ -64,6 +64,9 @@
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.Money = new System.Windows.Forms.Button();
+            this.fiveCoin = new System.Windows.Forms.ListBox();
+            this.twoCoin = new System.Windows.Forms.ListBox();
+            this.oneCoin = new System.Windows.Forms.ListBox();
             ((System.ComponentModel.ISupportInitialize)(this.BasicImage)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.newImage)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.PixelBar)).BeginInit();
@@ -365,7 +368,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(219, 538);
+            this.label1.Location = new System.Drawing.Point(852, 276);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(35, 13);
             this.label1.TabIndex = 30;
@@ -374,38 +377,38 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(260, 538);
+            this.label2.Location = new System.Drawing.Point(820, 171);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(35, 13);
+            this.label2.Size = new System.Drawing.Size(16, 13);
             this.label2.TabIndex = 31;
-            this.label2.Text = "label2";
+            this.label2.Text = "5:";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(219, 555);
+            this.label3.Location = new System.Drawing.Point(820, 209);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(35, 13);
+            this.label3.Size = new System.Drawing.Size(16, 13);
             this.label3.TabIndex = 32;
-            this.label3.Text = "label3";
+            this.label3.Text = "2:";
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(260, 555);
+            this.label4.Location = new System.Drawing.Point(820, 247);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(35, 13);
+            this.label4.Size = new System.Drawing.Size(16, 13);
             this.label4.TabIndex = 33;
-            this.label4.Text = "label4";
+            this.label4.Text = "1:";
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(314, 538);
+            this.label5.Location = new System.Drawing.Point(802, 276);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(35, 13);
+            this.label5.Size = new System.Drawing.Size(44, 13);
             this.label5.TabIndex = 34;
-            this.label5.Text = "label5";
+            this.label5.Text = "Сумма:";
             // 
             // Money
             // 
@@ -417,11 +420,47 @@
             this.Money.UseVisualStyleBackColor = true;
             this.Money.Click += new System.EventHandler(this.Money_Click);
             // 
+            // fiveCoin
+            // 
+            this.fiveCoin.FormattingEnabled = true;
+            this.fiveCoin.Items.AddRange(new object[] {
+            "Да",
+            "Нет"});
+            this.fiveCoin.Location = new System.Drawing.Point(842, 158);
+            this.fiveCoin.Name = "fiveCoin";
+            this.fiveCoin.Size = new System.Drawing.Size(66, 30);
+            this.fiveCoin.TabIndex = 36;
+            // 
+            // twoCoin
+            // 
+            this.twoCoin.FormattingEnabled = true;
+            this.twoCoin.Items.AddRange(new object[] {
+            "Да",
+            "Нет"});
+            this.twoCoin.Location = new System.Drawing.Point(842, 194);
+            this.twoCoin.Name = "twoCoin";
+            this.twoCoin.Size = new System.Drawing.Size(66, 30);
+            this.twoCoin.TabIndex = 37;
+            // 
+            // oneCoin
+            // 
+            this.oneCoin.FormattingEnabled = true;
+            this.oneCoin.Items.AddRange(new object[] {
+            "Да",
+            "Нет"});
+            this.oneCoin.Location = new System.Drawing.Point(842, 230);
+            this.oneCoin.Name = "oneCoin";
+            this.oneCoin.Size = new System.Drawing.Size(66, 30);
+            this.oneCoin.TabIndex = 38;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(957, 599);
+            this.Controls.Add(this.oneCoin);
+            this.Controls.Add(this.twoCoin);
+            this.Controls.Add(this.fiveCoin);
             this.Controls.Add(this.Money);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
@@ -507,6 +546,9 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button Money;
+        private System.Windows.Forms.ListBox fiveCoin;
+        private System.Windows.Forms.ListBox twoCoin;
+        private System.Windows.Forms.ListBox oneCoin;
     }
 }
 

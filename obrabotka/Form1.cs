@@ -815,7 +815,7 @@ namespace obrabotka
 
             label1.Text = "start";
 
-            Bitmap new_image = (Bitmap)BasicImage.Image;
+            Bitmap new_image = KirshF((Bitmap)BasicImage.Image.Clone());
             Bitmap old_image = (Bitmap)BasicImage.Image;
             int halfHoughWidth = (int)Math.Sqrt(old_image.Width/2 * old_image.Width / 2 + old_image.Height / 2 * old_image.Height / 2);
             int houghWidth = halfHoughWidth * 2;
@@ -832,7 +832,7 @@ namespace obrabotka
             {
                 for (int y = 0; y < old_image.Height; y++)
                 {
-                    Color c = old_image.GetPixel(x, y);
+                    Color c = new_image.GetPixel(x, y);
                     if (c.R == 255 && c.B == 255 && c.G == 255)
                     {
                         for (int theta = 0; theta <= 180; theta++)
@@ -863,19 +863,10 @@ namespace obrabotka
             int first_y = (int)(((-Math.Cos(max_theta) / Math.Sin(max_theta)) * first_x) + (max_rad / Math.Sin(max_theta)));
             int sec_x = old_image.Width;
             int sec_y = (int)(((-Math.Cos(max_theta) / Math.Sin(max_theta)) * sec_x) + (max_rad / Math.Sin(max_theta)));
-            int second_y = 0;
-            int second_x = (int)(((-Math.Sin(max_theta) / Math.Cos(max_theta)) * second_y) + (max_rad / Math.Cos(max_theta)));
             Graphics line = Graphics.FromImage(new_image);
-            Pen col = new Pen(Color.Red, 5);label1.Text = $"{first_x}";
-            label2.Text = $"{first_y}";
-            label3.Text = $"{sec_x}";
-            label4.Text = $"{sec_y}";
+            Pen col = new Pen(Color.Red, 5);
             line.DrawLine(col, first_x, first_y, sec_x, sec_y);
             newImage.Image = new_image;
-            char fy = (char)(first_y);
-            char fx = (char)(first_x);
-            char sx = (char)(second_x);
-            char sy = (char)(second_y);
             
         }
 
@@ -989,14 +980,15 @@ namespace obrabotka
             List<List<int>> maxHoughMap = new List<List<int>>();
             int max_a = 0;
             int max_b = 0;
-            int isf = 0;
+            int max_rad = 0;
+            int max_radius = 0;
             for (int a = 0; a < old_image.Width; a++)
             {
                 for (int b = 0; b < old_image.Height; b++)
                 {
-                    for (int radius = 10; radius < old_image.Height/2+1; radius++)
+                    for (int radius = 10; radius < old_image.Height / 2 + 1; radius++)
                     {
-                        if (houghMap[radius,a,b] > 4.9*radius)
+                        if (houghMap[radius, a, b] > 4.9 * radius)
                         {
                             if (a > radius && b > radius && a < new_image.Width - radius && b < new_image.Height - radius)
                             {
@@ -1006,7 +998,6 @@ namespace obrabotka
                                 }
                                 if (max_a == 0)
                                 {
-                                    isf += 1;
                                     max_a = a;
                                 }
                                 if (max_b == 0)
@@ -1020,7 +1011,7 @@ namespace obrabotka
                                     continue;
                                 }
                                 else
-                                {   
+                                {
                                     max_a = 0;
                                     max_b = 0;
                                     List<int> coin = new List<int>() { radius, a, b };
@@ -1032,16 +1023,65 @@ namespace obrabotka
                 }
             }
             int listSize = maxHoughMap.Count;
+            for (int i = 0; i < listSize-1; i++)
+            {
+                for (int j = i+1; j < listSize; j++)
+                {
+                    if (maxHoughMap[i][0] < maxHoughMap[j][0])
+                    {
+                        List<int> x = maxHoughMap[i];
+                        maxHoughMap[i] = maxHoughMap[j];
+                        maxHoughMap[j] = x;
+                    }
+                }
+            }
             for (int i = 0; i < listSize; i++)
             {
                 int radius = maxHoughMap[i][0];
                 int a = maxHoughMap[i][1];
                 int b = maxHoughMap[i][2];
                 Graphics circle = Graphics.FromImage(newImage.Image);
-                Pen col = new Pen(Color.Red, 3);
+                Pen col = new Pen(Color.Red, 1);
                 circle.DrawEllipse(col, a-radius, b-radius, radius * 2, radius * 2);
             }
+
+            List<int> coins = new List<int>();
+            if (fiveCoin.SelectedItem.ToString() == "Да")
+                coins.Add(5);
+            if (twoCoin.SelectedItem.ToString() == "Да")
+                coins.Add(2);
+            if (oneCoin.SelectedItem.ToString() == "Да")
+                coins.Add(1);
+            int[] numOfCoins = new int[coins.Count];
+            for (int i = 0; i < coins.Count; i++)
+            {
+                numOfCoins[i] = 0;
+            }
+            int number = 0;
+            int rad = maxHoughMap[0][0];
+            for (int i = 0; i < listSize; i++)
+            {
+                if (rad - maxHoughMap[i][0] < 4)
+                {
+                    numOfCoins[number] += 1;
+                }
+                else
+                {
+                    rad = maxHoughMap[i][0];
+                    number += 1;
+                    numOfCoins[number] += 1;
+                }
+            }
+
+            int sum = 0;
+            for (int i = 0; i < coins.Count; i++)
+            {
+                sum += coins[i] * numOfCoins[i];
+            }
+            label1.Text = $"{sum}";
+            
         }
+        
 
         private void BasicImage_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
         {
